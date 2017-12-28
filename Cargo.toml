@@ -1,0 +1,8 @@
+[package]
+name = "exlev"
+version = "0.1.0"
+authors = ["Katrina <kittys.junk.6502@gmail.com>"]
+
+[dependencies]
+sxd-xpath = "0.4.0"
+sxd-document = "0.2.3"

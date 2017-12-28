@@ -1,0 +1,48 @@
+[[package]]
+name = "exlev"
+version = "0.1.0"
+dependencies = [
+ "sxd-document 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sxd-xpath 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "peresil"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "quick-error"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "sxd-document"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "peresil 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "typed-arena 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "sxd-xpath"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "peresil 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quick-error 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sxd-document 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "typed-arena"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[metadata]
+"checksum peresil 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f658886ed52e196e850cfbbfddab9eaa7f6d90dd0929e264c31e5cec07e09e57"
+"checksum quick-error 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3c36987d4978eb1be2e422b1e0423a557923a5c3e7e6f31d5699e9aafaefa469"
+"checksum sxd-document 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2970ad3e41e58188e00f43c7c5730a8992862190736df77686d04eab63da2ea7"
+"checksum sxd-xpath 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f9d279b2ba303f3b51bb3f245538eb00be7c78c34fcad7232eb2af56a6f985fd"
+"checksum typed-arena 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5934776c3ac1bea4a9d56620d6bf2d483b20d394e49581db40f187e1118ff667"
