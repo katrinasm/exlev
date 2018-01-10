@@ -13,6 +13,7 @@ pub mod address;
 pub mod level_table;
 pub mod snes_color;
 pub mod compression;
+pub mod rats;
 
 use std::io::{Cursor, SeekFrom};
 use std::io::prelude::*;
@@ -56,7 +57,7 @@ fn parse_arguments() -> Option<Arguments> {
     let mut rom_path = None;
     let mut item_path = None;
     let mut action = None;
-    
+
     for arg in std::env::args().skip(1) {
         if arg.starts_with("--rom=") {
             if !rom_path.is_none() { return None; };
@@ -92,7 +93,7 @@ fn parse_arguments() -> Option<Arguments> {
             item_path = Some(PathBuf::from(arg));
         };
     }
-    
+
     if action.is_some() && rom_path.is_some() && item_path.is_some() {
         Some(Arguments {
             rom_path: rom_path.unwrap(),
@@ -111,14 +112,14 @@ fn submain() -> Result<(), Box<std::error::Error>> {
         panic!("you goofed it on the command line see the readme");
     };
     println!("{:?}", args);
-    
+
     let mut rom = OpenOptions::new().read(true).write(true).open(args.rom_path)?;
-    
+
     // 4 MB is a nice enough guess.
     let mut rombytes = Vec::with_capacity(4 * 1024 * 1024);
-    
+
     rom.read_to_end(&mut rombytes)?;
-    
+
     match args.action {
         CliAction::InsertTmx(lvln) =>
             rombytes = insert_level(rombytes, lvln, &args.item_path)?,
@@ -129,27 +130,30 @@ fn submain() -> Result<(), Box<std::error::Error>> {
         CliAction::ExtractGfx(_) =>
             unimplemented!(),
     }
-    
+
     rom.seek(SeekFrom::Start(0))?;
     rom.write_all(&rombytes)?;
-    
+
     Ok(())
 }
 
 fn insert_level(mut rombytes: Vec<u8>, lvlnum: u16, path: &PathBuf)
 -> Result<Vec<u8>, Box<std::error::Error>> {
-    let space = 0x3f8000; // PC
-    let start = space + 12; // points just past RATS_CLNP tag
+    let space = rats::find_free(&rombytes, 0x8000).expect("Need free bank");
+     // points just past RATS_CLNP tag
+    let start = address::Address::new_from_pc(
+        space.pc_ofs() + 12, address::Mapper::Lorom
+    ).unwrap();
 
     let mut f = File::open(path)?;
     let lvl = tmx::read_level(&mut f, "lev", lvlnum)?;
-    
+
     println!("{:?}", level_table::rm_level(&mut rombytes, lvlnum));
 
     let mut romcur = Cursor::new(rombytes);
-    romcur.seek(SeekFrom::Start(start))?;
+    romcur.seek(SeekFrom::Start(start.pc_ofs() as u64))?;
 
-    let start_ptr = address::Address::new_from_pc(start as usize, address::Mapper::Lorom).unwrap().snes_ofs().unwrap();
+    let start_ptr = start.snes_ofs().unwrap();
 
     let len = binlevel::write_level_body(&mut romcur, &lvl, start_ptr as u32)?;
 
@@ -157,7 +161,7 @@ fn insert_level(mut rombytes: Vec<u8>, lvlnum: u16, path: &PathBuf)
 
     let (len_lo, len_hi) = (len as u8, (len >> 8) as u8);
 
-    romcur.seek(SeekFrom::Start(space))?;
+    romcur.seek(SeekFrom::Start(space.pc_ofs() as u64))?;
     romcur.write_all(&b"STAR"[..])?;
     romcur.write_all(&[len_lo, len_hi, !len_lo, !len_hi])?;
     romcur.write_all(&b"CLNP"[..])?;
