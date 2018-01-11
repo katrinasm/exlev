@@ -36,22 +36,32 @@ pub fn find_aligned(rombytes: &[u8], len: usize, align: u8) -> Option<Address> {
         None
     }
 }
-/*
-pub fn insert(rombytes: &mut Vec<u8>, data: &[u8], loc: Address) {
-    let ofs = loc.pc_ofs();
-    assert!(data.len() <= 0x1_0000, "tried to insert too large (>64KiB) object");
 
+pub fn insert<W: ::std::io::Write>(buf: &mut W, data: &[u8]) {
+    assert!(data.len() <= 0x1_0000, "tried to insert too large (>64KiB) object");
+    assert!(data.len() != 0, "tried to insert zero-length object");
+    let len = data.len() as u16;
+    let tag = &[
+        b'S', b'T', b'A', b'R',
+        len as u8, (len >> 8) as u8,
+        (!len) as u8, (!len >> 8) as u8,
+    ];
+    buf.write_all(tag).unwrap();
+    buf.write_all(data).unwrap();
 }
 
 pub fn insert_free(rombytes: &mut Vec<u8>, data: &[u8]) -> Option<Address> {
-    if let Some(a) = find_free(&*rombytes, data.len()) {
-        insert(rombytes, data, a);
+    let block = data.len() + 8; // we need 8 extra bytes for the RATS itself
+    if let Some(a) = find_free(&*rombytes, block) {
+        let ofs = a.pc_ofs();
+        // Write is only impl'd for `&mut [u8]`, and we need &mut (something with Write)
+        insert(&mut &mut rombytes[ofs .. ofs + block], data);
         Some(a)
     } else {
         None
     }
 }
-*/
+
 fn rats_len(buf: &[u8]) -> Option<usize> {
     if buf.len() < 8
     || !buf.starts_with(b"STAR")
