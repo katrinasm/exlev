@@ -50,13 +50,13 @@ pub fn insert<W: ::std::io::Write>(buf: &mut W, data: &[u8]) {
     buf.write_all(data).unwrap();
 }
 
-pub fn insert_free(rombytes: &mut Vec<u8>, data: &[u8]) -> Option<Address> {
+pub fn insert_free(rombytes: &mut [u8], data: &[u8]) -> Option<Address> {
     let block = data.len() + 8; // we need 8 extra bytes for the RATS itself
     if let Some(a) = find_free(&*rombytes, block) {
         let ofs = a.pc_ofs();
         // Write is only impl'd for `&mut [u8]`, and we need &mut (something with Write)
         insert(&mut &mut rombytes[ofs .. ofs + block], data);
-        Some(a)
+        Address::new_from_pc(a.pc_ofs() + 8, Mapper::Lorom)
     } else {
         None
     }
