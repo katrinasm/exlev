@@ -21,13 +21,13 @@ pub fn decomp_with_hint(buf: &[u8], size_hint: usize) -> DcResult<Vec<u8>> {
             _ => panic!("incomprehensible failure in LZ2 DC"),
         };
     }
-    
+
     if targ.len() > 0xffff {
         return Err(DcErr::LcLzOverlongOutput);
     };
-    
+
     targ.shrink_to_fit();
-    
+
     Ok(targ)
 }
 
@@ -36,14 +36,14 @@ fn inc_fill(buf: &[u8], targ: &mut Vec<u8>, idx: usize, len: u16)
     if remaining_len(buf, idx) < 1 {
         return Err(DcErr::LcLzPrematureTermination);
     }
-    
+
     let mut value = buf[0];
-    
+
     for _ in 0 .. len {
         targ.push(value);
         value = value.wrapping_add(1);
     }
-    
+
     Ok(idx + 1)
 }
 
