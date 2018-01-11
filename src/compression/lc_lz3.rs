@@ -19,7 +19,7 @@ pub fn decomp_with_hint(buf: &[u8], size_hint: usize) -> DcResult<Vec<u8>> {
             4 => repeat(buf, &mut targ, input_idx, len)?,
             5 => repeat_bit_reversed(buf, &mut targ, input_idx, len)?,
             6 => repeat_backward(buf, &mut targ, input_idx, len)?,
-            _ => unreachable!(),
+            _ => panic!("incomprehensible failure in LZ3 DC"),
         };
     }
 
